@@ -1,0 +1,6 @@
+C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\bin\Debug\743E Владик и карты.exe.config
+C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\bin\Debug\743E Владик и карты.exe
+C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\bin\Debug\743E Владик и карты.pdb
+C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\obj\Debug\743E Владик и карты.csprojResolveAssemblyReference.cache
+C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\obj\Debug\743E Владик и карты.exe
+C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\obj\Debug\743E Владик и карты.pdb
