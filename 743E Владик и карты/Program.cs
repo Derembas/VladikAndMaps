@@ -18,22 +18,23 @@ namespace _743E_Владик_и_карты
 
         static void Main(string[] args)
         {
-            Stopwatch Counter = new Stopwatch();
-            Stopwatch StepCount = new Stopwatch();
-            //GlobalVars.n =Convert.ToInt32( Console.ReadLine());
-            n = 1000;
-            System.Random Rnd = new System.Random();
-            //string Start = "8 8 8 7 8 7 6 8 6 5 8 5 4 8 4 3 8 3 2 8 2 1 8 1";
+            //Stopwatch Counter = new Stopwatch();
+            //Stopwatch StepCount = new Stopwatch();
+            n =Convert.ToInt32( Console.ReadLine());
+            //n = 9;
+            //System.Random Rnd = new System.Random();
+            //string Start = "1 2 3 4 5 6 7 8 8";
+            //string Start = "5 2 2 7 5 2 6 4 3 8 1 8 4 2 7";
             //Случайное заполнение массива
-            string Start = Rnd.Next(1, 9).ToString();
-            for (int i = 1; i < n; i++)
-            {
-                Start += " " + Rnd.Next(1, 9);
-            }
+            //string Start = Rnd.Next(1, 9).ToString();
+            //for (int i = 1; i < n; i++)
+            //{
+            //    Start += " " + Rnd.Next(1, 9);
+            //}
             //Console.WriteLine(Start);
-            //string[] Mass = Console.ReadLine().Split(' ');
-            string[] Mass = Start.Split(' ');
-            Counter.Start();
+            string[] Mass = Console.ReadLine().Split(' ');
+            //string[] Mass = Start.Split(' ');
+            //Counter.Start();
             // Считываем данные
             byte[] AllCards = new byte[n];
             for (byte i=0; i < 8; i++) { EachCards[i] = new List<int>(); }
@@ -47,31 +48,36 @@ namespace _743E_Владик_и_карты
             //GlobalVars.Stack = new byte[8];
             MaxLen = 0;
 
+            // Находим решение для случая, когда еоличество всех цифр одинаково
             int LeftBorder = 0;
             int RightBorder = CardsCount.Min();
-            StepCount.Start();
-            int CurMass = RightBorder/ 2;
+            //StepCount.Start();
+            int CurMaxlen;
+            int CurMass = (int)Math.Ceiling((double) RightBorder/ 2);
+            bool[] Done = CreateDone(); // Проверенные цыфры. Если цифры нет, то она помечается как проверенная
             while (LeftBorder != RightBorder)
             {
-                StepCount.Restart();
-                int CurMaxlen = 0;
-                bool[] Done = new bool[8];
-                Solve(0, 0, CurMass, Done, ref CurMaxlen);
+                //StepCount.Restart();
+                CurMaxlen = 0;
+                Solve(0, 0, CurMass, Done, ref CurMaxlen, false);
                 if (CurMaxlen == 0) { RightBorder = Math.Max(LeftBorder, CurMass - 1); }
                 else
                 {
                     MaxLen = Math.Max(MaxLen, CurMaxlen);
-                    //if (CurMaxlen < 8 * (CurMass + 1)) { GoForver = false; }
                     LeftBorder = Math.Min(RightBorder, CurMass);
                 }
-                Console.WriteLine("Kol=" + CurMass + " - MaxLen=" + CurMaxlen + " - за " + StepCount.ElapsedMilliseconds + " мс.");
-                CurMass = LeftBorder + (RightBorder - LeftBorder) / 2;
+                //Console.WriteLine("Kol=" + CurMass + " - MaxLen=" + CurMaxlen);
+                CurMass = LeftBorder + (int)Math.Ceiling((double)(RightBorder - LeftBorder) / 2);
             }
-            Console.WriteLine("Ans=" + CurMass);
-            StepCount.Stop();
-            Console.WriteLine("MaxLen: " + MaxLen);
-            Console.WriteLine("Решение за " + Counter.ElapsedMilliseconds + " мс.");
-            Console.ReadKey();
+            //Console.WriteLine("Ans=" + CurMass);
+            // Находим полное решение
+            //StepCount.Restart();
+            CurMaxlen = 0;
+            Solve(0, 0, CurMass, Done,ref CurMaxlen, true);
+            Console.WriteLine(CurMaxlen);
+            //StepCount.Stop();
+            //Console.WriteLine("Решение за " + Counter.ElapsedMilliseconds + " мс.");
+            //Console.ReadKey();
         }
 
         // Функция добавления новой пары в массив
@@ -108,7 +114,7 @@ namespace _743E_Владик_и_карты
         }
 
         // Рекурсивная функция поиска решения
-        static void Solve(int CurEnd, int CurLen, int CurMass, bool[] Done, ref int CurMaxLen )
+        static void Solve(int CurEnd, int CurLen, int CurMass, bool[] Done, ref int CurMaxLen, bool Final )
         {
             // CurEnd - номер в массиве AllCards
             // CurLen - Текущая общая длина длина уже выбранных пар
@@ -131,12 +137,17 @@ namespace _743E_Владик_и_карты
             {
                 if (!Done[i])
                 {
-                    Pair CurPair = LeftPair(i, CurEnd, CurMass + 1);
-                    //if (CurPair.Lenth != 0)
-                    //{
-                    //    ThisRoundMass.Add(CurPair);
-                    //    AllNumHavePair[i] = true;
-                    //}
+                    Pair CurPair;
+                    if (Final)
+                    {
+                        CurPair = LeftPair(i, CurEnd, CurMass + 1);
+                        if (CurPair.Lenth != 0)
+                        {
+                            ThisRoundMass.Add(CurPair);
+                            AllNumHavePair[i] = true;
+                        }
+                    }
+                    
                     CurPair = LeftPair(i, CurEnd, CurMass);
                     if (CurPair.Lenth != 0)
                     {
@@ -153,7 +164,7 @@ namespace _743E_Владик_и_карты
                 {
                     CurLen += ThisRoundPair.Mass;
                     Done[ThisRoundPair.Point] = true;
-                    Solve(ThisRoundPair.EndPoz, CurLen, CurMass, Done,ref CurMaxLen);
+                    Solve(ThisRoundPair.EndPoz, CurLen, CurMass, Done,ref CurMaxLen, Final);
                     CurLen -= ThisRoundPair.Mass;
                     Done[ThisRoundPair.Point] = false;
                 }
@@ -164,15 +175,26 @@ namespace _743E_Владик_и_карты
         static Pair LeftPair(byte Point, int Min, int Mass)
         {
             Pair Rezult = new Pair();
-            int StartPoz = Next(Point, Min);
-            if (EachCards[Point].Count > StartPoz + Mass-1)
+            if (Mass==0)
             {
-                Rezult.StartPoz = EachCards[Point][StartPoz];
-                Rezult.EndPoz = EachCards[Point][StartPoz+ Mass-1];
-                Rezult.Mass = Mass;
+                Rezult.EndPoz = Min;
+                Rezult.Mass = 0;
                 Rezult.Point = Point;
-                Rezult.Lenth = Rezult.EndPoz-Rezult.StartPoz;
+                Rezult.Lenth = 1;
             }
+            else
+            {
+                int StartPoz = Next(Point, Min);
+                if (EachCards[Point].Count > StartPoz + Mass-1)
+                {
+                    Rezult.StartPoz = EachCards[Point][StartPoz];
+                    Rezult.EndPoz = EachCards[Point][StartPoz+ Mass-1];
+                    Rezult.Mass = Mass;
+                    Rezult.Point = Point;
+                    Rezult.Lenth = Rezult.EndPoz-Rezult.StartPoz+1;
+                }
+            }
+            
             return Rezult;
         } 
 
@@ -180,7 +202,7 @@ namespace _743E_Владик_и_карты
         static int Next(byte Point, int Min)
         {
             int LeftBorder = 0;
-            int RightBorder = EachCards[Point].Count-1;
+            int RightBorder = EachCards[Point].Count;
             int Answer = RightBorder/2;
             while (LeftBorder!=RightBorder)
             {
@@ -199,6 +221,17 @@ namespace _743E_Владик_и_карты
                 if (!Done[i]) { return false; }
             }
             return true;
+        }
+
+        // Функция проверки всех не нулевых массивов
+        static bool[] CreateDone()
+        {
+            bool[] Answer = new bool[8];
+            for (int i =0; i<8;i++)
+            {
+                if (EachCards[i].Count == 0) { Answer[i] = true; }
+            }
+            return Answer;
         }
     }
 
