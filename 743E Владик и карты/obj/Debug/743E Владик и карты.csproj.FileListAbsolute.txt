@@ -4,3 +4,9 @@ C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\7
 C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\obj\Debug\743E Владик и карты.csprojResolveAssemblyReference.cache
 C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\obj\Debug\743E Владик и карты.exe
 C:\Users\Asus\Google Диск\VBПроекты\743E Владик и карты\743E Владик и карты\obj\Debug\743E Владик и карты.pdb
+C:\GitHub\VladikAndMaps\743E Владик и карты\bin\Debug\743E Владик и карты.exe.config
+C:\GitHub\VladikAndMaps\743E Владик и карты\obj\Debug\743E Владик и карты.exe
+C:\GitHub\VladikAndMaps\743E Владик и карты\obj\Debug\743E Владик и карты.pdb
+C:\GitHub\VladikAndMaps\743E Владик и карты\bin\Debug\743E Владик и карты.exe
+C:\GitHub\VladikAndMaps\743E Владик и карты\bin\Debug\743E Владик и карты.pdb
+C:\GitHub\VladikAndMaps\743E Владик и карты\obj\Debug\743E Владик и карты.csprojResolveAssemblyReference.cache

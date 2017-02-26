@@ -21,11 +21,11 @@ namespace _743E_Владик_и_карты
             Stopwatch Counter = new Stopwatch();
             Stopwatch StepCount = new Stopwatch();
             //GlobalVars.n =Convert.ToInt32( Console.ReadLine());
-            n = 100;
+            n = 1000;
             System.Random Rnd = new System.Random();
-            //string Start = "1 8 1 2 8 2 3 8 3 4 8 4 5 8 5 6 8 6 7 8 7 8 8 8";
+            //string Start = "8 8 8 7 8 7 6 8 6 5 8 5 4 8 4 3 8 3 2 8 2 1 8 1";
             //Случайное заполнение массива
-            string Start = "1";
+            string Start = Rnd.Next(1, 9).ToString();
             for (int i = 1; i < n; i++)
             {
                 Start += " " + Rnd.Next(1, 9);
@@ -45,79 +45,33 @@ namespace _743E_Владик_и_карты
                 CardsCount[CurPoint-1] += 1;
             }
             //GlobalVars.Stack = new byte[8];
-            for (byte i = 0; i < 8; i++)
-            {
-                //Console.WriteLine((i + 1) + " - " + GlobalVars.CardsCount[i]);
-                Stack[i] = i;
-                for (int k = i-1; k >= 0; k--)
-                {
-                    if (CardsCount[Stack[k]] > CardsCount[i])
-                    {
-                        Stack[k + 1] = Stack[k];
-                        Stack[k] = i;
-                    }
-                }
-            }
-            for (byte i = 0; i < 8; i++) { Console.WriteLine((i + 1) + " - " + Stack[i] + " - " + CardsCount[Stack[i]]); }
             MaxLen = 0;
 
             int LeftBorder = 0;
             int RightBorder = CardsCount.Min();
-            bool GoForver = true;
             StepCount.Start();
-            while (GoForver)
+            int CurMass = RightBorder/ 2;
+            while (LeftBorder != RightBorder)
             {
                 StepCount.Restart();
-                if (LeftBorder == RightBorder) { GoForver = false; }
-                int k = LeftBorder+ (RightBorder - LeftBorder) / 2;
-                List<Pair> AllPairs = FindPairs(k);
                 int CurMaxlen = 0;
-                Solve(AllPairs,k,ref CurMaxlen, 0);
-                if (CurMaxlen == 0) { RightBorder = Math.Max(LeftBorder, k - 1); }
+                bool[] Done = new bool[8];
+                Solve(0, 0, CurMass, Done, ref CurMaxlen);
+                if (CurMaxlen == 0) { RightBorder = Math.Max(LeftBorder, CurMass - 1); }
                 else
                 {
                     MaxLen = Math.Max(MaxLen, CurMaxlen);
-                    if (CurMaxlen < 8 * (k + 1)) { GoForver = false; }
-                    LeftBorder = Math.Min(RightBorder, k + 1);
+                    //if (CurMaxlen < 8 * (CurMass + 1)) { GoForver = false; }
+                    LeftBorder = Math.Min(RightBorder, CurMass);
                 }
-                Console.WriteLine("Kol=" + k + " - MaxLen=" + CurMaxlen + " - за " + StepCount.ElapsedMilliseconds + " мс.");
+                Console.WriteLine("Kol=" + CurMass + " - MaxLen=" + CurMaxlen + " - за " + StepCount.ElapsedMilliseconds + " мс.");
+                CurMass = LeftBorder + (RightBorder - LeftBorder) / 2;
             }
+            Console.WriteLine("Ans=" + CurMass);
             StepCount.Stop();
             Console.WriteLine("MaxLen: " + MaxLen);
             Console.WriteLine("Решение за " + Counter.ElapsedMilliseconds + " мс.");
             Console.ReadKey();
-        }
-
-        // Функция поиска всех нужных пар
-        static List<Pair> FindPairs(int Kol)
-        {
-            List<Pair> AllPairs = new List<Pair>();
-            for (byte i = 0; i < 8; i++)
-            {
-                AllPairs.AddRange(MakeList(EachCards[Stack[i]], (Kol+1), i));
-                AllPairs.AddRange(MakeList(EachCards[Stack[i]], Kol, i));
-            }
-            return AllPairs;
-        }
-
-        // Функция выбора всех пар чисел
-        static List <Pair> MakeList(List<int> Arr, int Kol, byte CurPoint)
-        {
-            List<Pair> OutList = new List<Pair>();
-            if (Arr.Count>=Kol && Kol>0)
-            {
-                for (int i=0; i<=Arr.Count-Kol; i++)
-                {
-                    Pair CurPair = new Pair();
-                    CurPair.StartPoz = Arr[i];
-                    CurPair.EndPoz = Arr[i + Kol-1];
-                    CurPair.Mass = Kol;
-                    CurPair.Point = CurPoint;
-                    CurPair.Lenth = (CurPair.EndPoz - CurPair.StartPoz + 1);
-                    OutList.Add(CurPair);
-                }
-            }
-            return OutList;
         }
 
         // Функция добавления новой пары в массив
@@ -154,67 +108,107 @@ namespace _743E_Владик_и_карты
         }
 
         // Рекурсивная функция поиска решения
-        static void Solve(List<Pair> Arr, int CurLen, ref int CurMass, byte Step )
+        static void Solve(int CurEnd, int CurLen, int CurMass, bool[] Done, ref int CurMaxLen )
         {
-            // Если дошли до 7го уровня вычисляем максимальную длинну
-            if (Step == 7)
+            // CurEnd - номер в массиве AllCards
+            // CurLen - Текущая общая длина длина уже выбранных пар
+            // CurMass - Длиня каждой пары
+            // Done - Какие цыфры уже обработаны
+            // CurMaxLen - Найденная на данный момент максимальная длина
+            
+            // Если обработыны все цыфры возвращаем результат
+            if (AllDone(Done))
             {
-                MaxLen = Math.Max(MaxLen, CurMass);
+                CurMaxLen = Math.Max(CurMaxLen, CurLen);
                 return;
             }
+            // Если CurMaxLen=8*(CurMas+1) - то больше уже не найдём
+            if (CurMaxLen == 8 * (CurMass + 1)) { return; }
             // Выбираем из массива всех пар самые левые для каждого значения карты
             List<Pair> ThisRoundMass = new List<Pair>();
+            bool[] AllNumHavePair = new bool[8];
             for (byte i=0; i<8;i++)
             {
-                Pair CurPair = LeftPair(i, CurLen + 1, Arr);
-                if (CurPair.Lenth != 0) { ThisRoundMass.Add(CurPair); }
-                CurPair = LeftPair(i, CurLen , Arr);
-                if (CurPair.Lenth != 0) { ThisRoundMass.Add(CurPair); }
+                if (!Done[i])
+                {
+                    Pair CurPair = LeftPair(i, CurEnd, CurMass + 1);
+                    //if (CurPair.Lenth != 0)
+                    //{
+                    //    ThisRoundMass.Add(CurPair);
+                    //    AllNumHavePair[i] = true;
+                    //}
+                    CurPair = LeftPair(i, CurEnd, CurMass);
+                    if (CurPair.Lenth != 0)
+                    {
+                        ThisRoundMass.Add(CurPair);
+                        AllNumHavePair[i] = true;
+                    }
+                }
+                else { AllNumHavePair[i] = true; }
             }
-            foreach (Pair ThisRoundPair in ThisRoundMass)
+            // Если для какого то числа нет пар выходим из цикла
+            if (AllDone(AllNumHavePair))
             {
-                CurMass += ThisRoundPair.Mass;
-                Step++;
-                List<Pair> NextStep = LeftPairs(ThisRoundPair, Arr);
-                if (NextStep != null) { Solve(NextStep, CurLen, ref CurMass, Step); }
-                CurMass -= ThisRoundPair.Mass;
-                Step--;
+                foreach (Pair ThisRoundPair in ThisRoundMass)
+                {
+                    CurLen += ThisRoundPair.Mass;
+                    Done[ThisRoundPair.Point] = true;
+                    Solve(ThisRoundPair.EndPoz, CurLen, CurMass, Done,ref CurMaxLen);
+                    CurLen -= ThisRoundPair.Mass;
+                    Done[ThisRoundPair.Point] = false;
+                }
             }
         }
         
-        // Функция выбора оставшихся пар
-        static List<Pair> LeftPairs(Pair SelectedPair, List<Pair> AllPairs)
-        {
-            List<Pair> Result = new List<Pair>();
-            var LeftP = from Pair CurPair in AllPairs
-                        where CurPair.Point != SelectedPair.Point && CurPair.StartPoz > SelectedPair.EndPoz
-                        select CurPair;
-
-            if (LeftP!=null && LeftP.Any()) { Result.AddRange(LeftP); }
-            return Result;
-        }
-
-        // Функция выбора самой левой пары
-        static Pair LeftPair(byte Point, int Mass, List<Pair> AllPairs)
+        // Функция выбора самой левой пары со значением больше Min
+        static Pair LeftPair(byte Point, int Min, int Mass)
         {
             Pair Rezult = new Pair();
-            var LP = from Pair CurPair in AllPairs
-                     where CurPair.Point == Point && CurPair.Mass==Mass
-                     orderby CurPair.StartPoz
-                     select CurPair;
-
-            if (LP != null && LP.Any()) { Rezult= LP.First(); }
+            int StartPoz = Next(Point, Min);
+            if (EachCards[Point].Count > StartPoz + Mass-1)
+            {
+                Rezult.StartPoz = EachCards[Point][StartPoz];
+                Rezult.EndPoz = EachCards[Point][StartPoz+ Mass-1];
+                Rezult.Mass = Mass;
+                Rezult.Point = Point;
+                Rezult.Lenth = Rezult.EndPoz-Rezult.StartPoz;
+            }
             return Rezult;
         } 
+
+        // Определение самого левого символа в оставшемся массиве со значением больше мин
+        static int Next(byte Point, int Min)
+        {
+            int LeftBorder = 0;
+            int RightBorder = EachCards[Point].Count-1;
+            int Answer = RightBorder/2;
+            while (LeftBorder!=RightBorder)
+            {
+                if (EachCards[Point][Answer] < Min) { LeftBorder= Math.Min(RightBorder, Answer + 1); }
+                else { RightBorder = Math.Max(LeftBorder, Answer); }
+                Answer = LeftBorder + (RightBorder - LeftBorder) / 2;
+            }
+            return Answer;
+        }
+
+        // Функция проверки все ли цыфр обработаны
+        static bool AllDone(bool[] Done)
+        {
+            for (byte i=0; i<8; i++)
+            {
+                if (!Done[i]) { return false; }
+            }
+            return true;
+        }
     }
 
     public struct Pair
     {
-        public int StartPoz;
-        public int EndPoz;
-        public int Mass;
-        public int Lenth;
-        public byte Point;
+        public int StartPoz; // Номер первого элемента пары в массиве AllCards
+        public int EndPoz; // Номер последнего элемента пары в массиве AllCards
+        public int Mass; // Масса пары (количество одинаковых цифр, которые покрывает пара
+        public int Lenth; // Длина пары (количество цифр, которое покрывает пара в массива AllCards
+        public byte Point; // Цифра
     }
     public struct PairLine
     {
